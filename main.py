@@ -10,11 +10,15 @@ import numpy as np
 import pandas as pd
 pio.renderers.default="chrome"
 
-#with urlopen('https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json') as response:
-    #counties = json.load(response)
 
-#zipfile = "geojsons/ne_10m_roads.zip"
-#roads = gpd.read_file(zipfile)
+def main():
+    app = Dash(__name__)
+    app.layout = html.Div([
+        html.Div([html.Center("EV Charging Station Optimization")],id="title",
+                 style={"width": "100%", "height": "10%", "font-weight": "bold", "font-size": "48px"}),
+        dcc.Graph(id="graph", figure=displayRoads())
+    ], style={"width": "100%", "height": "90%"})
+    app.run_server(debug=True)
 
 def loadRoads():
     return(pd.read_hdf("geojsons/maps.h5","roads"))
@@ -26,34 +30,36 @@ def getColorForVolume(volume):
     lz = 5
     lc = len(colors)
     colors = [colors[int(i * lc / lz)] for i in range(1,lz)]
-    return pd.qcut(volume, lz, labels=colors, duplicates="drop")
+    return volume,pd.qcut(volume, lz, labels=colors, duplicates="drop"), colors
 
-def getRoadGO(rdf):
+def getRoadGO(roads, color):
+    rdf = roads[roads.vol_color == color]
+    colmap = {v:k for k,v in enumerate(rdf.columns)}
+    rpt = [[i]*v.flatten().shape[0] for i,v in enumerate(rdf.lat.values)]
+    rpt = np.array([i for row in rpt for i in row])
+    cd = rdf.iloc[rpt,:]
     return go.Scattergeo(
         locationmode='USA-states',
         lat=np.concatenate([i.flatten() for i in rdf.lat.values]),
         lon=np.concatenate([i.flatten() for i in rdf.lon.values]),
         mode="lines",
         line=dict(width=1, color=rdf.vol_color.iloc[0]),
+        customdata=cd.values,
+        hovertemplate='<b>Traffic Volume: %{customdata['+str(colmap["volume"])+']:,}' +
+        '<br> Highway Num: %{customdata['+str(colmap["name"])+']:,}',
+        name=f">{rdf.volume.astype(int).min():,} to <{rdf.volume.astype(int).max():,}",
+        hoverinfo="none",
     )
 
-def display_roads():
+def displayRoads():
     roads = loadRoads()
-    roads["vol_color"] = getColorForVolume(roads.volume)
-
+    roads["volume"],roads["vol_color"], colors = getColorForVolume(roads.volume)
     fig = go.Figure()
-    colors = roads.vol_color.value_counts().index.tolist()
     for c in colors:
-        rdf = roads[roads.vol_color == c]
-        fig.add_trace(getRoadGO(rdf))
-
-    fig.update_layout(margin=dict(l=0, r=0, t=0, b=0), width=1400, height=800)
-
+        fig.add_trace(getRoadGO(roads, c))
+    fig.update_layout(margin=dict(l=10, r=10, t=40, b=20), width=1400, height=800)
     fig.update_geos(visible=True, scope="usa")
     return fig
 
-app = Dash(__name__)
-app.layout = html.Div([
-    dcc.Graph(id="graph", figure=display_roads())
-], style = {"width" : "100%", "height" : "100%"})
-app.run_server(debug=True)
+
+main()
