@@ -11,8 +11,6 @@ def roadsIntoFastJson():
     roads = gpd.read_file(zipfile)
     volx = pd.read_csv("data/2020.csv")
     sel_columns = [
-        "scalerank",
-        "featurecla",
         "type",
         "name","namealt","namealtt",
         "length_km",
@@ -21,14 +19,16 @@ def roadsIntoFastJson():
         "label", "label2",
         "expressway",
         "level",
-        "min_zoom",
         "min_label",
         "geometry"
     ]
 
-    roads = roads[roads["continent"]=="North America"]
+    roads = roads[
+        (roads["continent"]=="North America") &
+        (roads["sov_a3"]=="USA") &
+        (roads["featurecla"]=="Road")
+    ]
     roads = roads[sel_columns]
-
 
     def getxy(x):
         if isinstance(x, LineString):
@@ -78,18 +78,18 @@ def roadsIntoFastJson():
     return 0
 
 def add_cap():
-        stats = pd.read_csv('EVStations_data_cleaned.csv')
-        stats["b"] = 0
-        stats['b'] = np.where(~stats['EV Level1 EVSE Num'].isna(), 1.2 * stats['EV Level1 EVSE Num'], stats['b']) 
-        stats['b'] = np.where(~stats['EV Level2 EVSE Num'].isna(),  7.6* stats['EV Level2 EVSE Num'] + stats['b'], stats['b']) 
-        stats['b'] = np.where(~stats['EV DC Fast Count'].isna(),  50* stats['EV DC Fast Count'] + stats['b'], stats['b']) 
-        stats['b'] = ((stats['b'].astype(int)).astype(str)) + 'kW'
-        stats['EV Connector Types'] = stats['EV Connector Types'].str.replace(' ', ', ')
-        stats.to_csv('EV_data_capacity.csv', index = False)
+    stats = pd.read_csv('data/EVStations_data_cleaned.csv')
+    stats["b"] = 0
+    stats['b'] = np.where(~stats['EV Level1 EVSE Num'].isna(), 1.2 * stats['EV Level1 EVSE Num'], stats['b'])
+    stats['b'] = np.where(~stats['EV Level2 EVSE Num'].isna(),  7.6* stats['EV Level2 EVSE Num'] + stats['b'], stats['b'])
+    stats['b'] = np.where(~stats['EV DC Fast Count'].isna(),  50* stats['EV DC Fast Count'] + stats['b'], stats['b'])
+    stats['b'] = ((stats['b'].astype(int)).astype(str)) + 'kW'
+    stats['EV Connector Types'] = stats['EV Connector Types'].str.replace(' ', ', ')
+    stats.to_csv('EV_data_capacity.csv', index = False)
 
 
 add_cap()
-#roadsIntoFastJson()
+roadsIntoFastJson()
 
 
 
