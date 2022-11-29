@@ -21,7 +21,11 @@ def main():
     app.run_server(debug=True)
 
 def loadRoads():
-    return(pd.read_hdf("geojsons/maps.h5","roads"))
+    return(pd.read_hdf("maps.h5","roads"))
+
+def loadChargingStationData():
+    return(pd.read_csv('EV_data_capacity.csv'))
+    
 
 def getColorForVolume(volume):
     colors = px.colors.sequential.YlOrBr
@@ -57,9 +61,36 @@ def displayRoads():
     fig = go.Figure()
     for c in colors:
         fig.add_trace(getRoadGO(roads, c))
+    fig = displayChargingSt(fig)
     fig.update_layout(margin=dict(l=10, r=10, t=40, b=20), width=1400, height=800)
     fig.update_geos(visible=True, scope="usa")
     return fig
+
+def displayChargingSt(fig):
+    
+    stats = loadChargingStationData()
+    fig.add_trace(
+    go.Scattergeo(
+        locationmode='USA-states',
+        lat=np.concatenate([i.flatten() for i in stats.Latitude.values]),
+        lon=np.concatenate([i.flatten() for i in stats.Longitude.values]),
+        mode="markers",
+        marker = dict(symbol = 'circle', size = 5, color = '#1f66e5', line = dict(width = 0.5, color = '#1347a4')),
+        opacity = 0.7 ,
+        #text = stats['Station Name'],
+        #text = "Hey",
+        hovertemplate = stats['Station Name']+'<br>'+stats['City']+'<br>'+stats['Access Days Time']+'<br>'+
+        'Capacity: '+stats['b'] +'<br>'+ 'Ports : ' + stats['EV Connector Types'] + '<extra></extra>',
+        #marker_color = '#55aaaa',
+        #name=f">{stats.volume.astype(int).min():,} to <{stats.volume.astype(int).max():,}",
+        hoverinfo="none"
+        
+    )
+    )
+    return fig
+
+
+
 
 
 main()
