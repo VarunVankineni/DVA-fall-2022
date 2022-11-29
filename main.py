@@ -23,27 +23,18 @@ def topRowElements():
         "Unused Element",
         style={"width": "100%", "height": "100%", "font-weight": "bold", "font-size": "48px"}
     )
-    return [
-        C(title_elem),
-        C(extra_elem)
-    ]
-    #, id="title",style={'display': 'inline-block'}
+    return [C(title_elem),C(extra_elem)]
 
 def rightInfoPlots():
     top_plot = html.Div(
         "Top Plot",
         style={"width": "440", "height": "440","font-weight": "bold", "font-size": "48px"}
     )
-
     bot_plot = html.Div(
         "Bot Plot",
         style={"width": "440", "height": "440","font-weight": "bold", "font-size": "48px"}
     )
-
-    return [
-        R(top_plot),
-        R(bot_plot)
-    ]
+    return [R(top_plot),R(bot_plot)]
 
 def bottomRowElements():
     left_col = html.Div(
@@ -52,10 +43,7 @@ def bottomRowElements():
     )
     main_map = dcc.Graph(id="graph", figure=displayRoads())
     right_plots = rightInfoPlots()
-    return [ C(left_col),
-        C(main_map),
-        C(right_plots)
-    ]#, id="bottom_row_elements",style={'display': 'inline-block'}
+    return [C(left_col),C(main_map),C(right_plots)]
 
 def main():
     app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -63,7 +51,6 @@ def main():
         R(topRowElements()),
         R(bottomRowElements())
     ], style={"width": "100%", "height": "100%"})
-
     app.run_server(debug=True)
 
 def loadRoads():
@@ -114,7 +101,6 @@ def displayRoads():
     return fig
 
 def displayChargingSt(fig):
-
     stats = loadChargingStationData()
     fig.add_trace(
     go.Scattergeo(
@@ -124,14 +110,8 @@ def displayChargingSt(fig):
         mode="markers",
         marker = dict(symbol = 'circle', size = 5, color = '#1f66e5', line = dict(width = 0.5, color = '#1347a4')),
         opacity = 0.7 ,
-        #text = stats['Station Name'],
-        #text = "Hey",
-        hovertemplate = stats['Station Name']+'<br>'+stats['City']+'<br>'+stats['Access Days Time']+'<br>'+
-        'Capacity: '+stats['b'] +'<br>'+ 'Ports : ' + stats['EV Connector Types'] + '<extra></extra>',
-        #marker_color = '#55aaaa',
-        #name=f">{stats.volume.astype(int).min():,} to <{stats.volume.astype(int).max():,}",
+        hovertemplate = stats['Station Name']+'<br>'+ 'Capacity: '+stats['b'] +'<br>'+ 'Ports : ' + stats['EV Connector Types'] + '<extra></extra>',
         hoverinfo="none"
-
     )
     )
     return fig
