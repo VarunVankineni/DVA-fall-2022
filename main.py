@@ -39,9 +39,6 @@ def loadChargingStationData():
 GLOBAL_ROADS_DB_BASE, GLOBAL_ROADS_COLORS = loadBaseRoads()
 GLOBAL_ROADS_DB = GLOBAL_ROADS_DB_BASE.copy()
 
-
-
-
 def trafficVolumeStrings():
     while(1):
         strings = []
@@ -84,7 +81,8 @@ def rightInfoPlots():
     )
     bot_plot = html.Div(
         "Bot Plot",
-        style={"width": "440", "height": "440","font-weight": "bold", "font-size": "48px"}
+        style={"width": "440", "height": "440","font-weight": "bold", "font-size": "48px"},
+        id = "bot-plot"
     )
     return [R(top_plot),R(bot_plot)]
 
@@ -93,7 +91,7 @@ def bottomRowElements():
         "Legend and Filters",
         style = {"width": "240", "height": "880", "font-weight": "bold", "font-size": "48px"}
     )
-    main_map = dcc.Graph(id="graph", figure=displayRoads())
+    main_map = dcc.Graph(id="graph", figure=mainGraph())
     right_plots = rightInfoPlots()
     return [C(main_map),C(right_plots)]#C(left_col)
 
@@ -107,8 +105,8 @@ def getRoadGO(roads, color):
     rpt = np.array([i for row in rpt for i in row])
     cd = rdf.iloc[rpt,:]
     return go.Scattermapbox(
-        lat=np.concatenate([i.flatten() for i in rdf.lat.values]),
-        lon=np.concatenate([i.flatten() for i in rdf.lon.values]),
+        lat=np.concatenate(rdf.lat.values),
+        lon=np.concatenate(rdf.lon.values),
         mode="lines",
         line=dict(width=1, color=rdf.vol_color.iloc[0]),
         hovertemplate= '<b>Traffic Volume: '+ cd["volume"].astype(str) +
@@ -121,24 +119,32 @@ def getRoadGO(roads, color):
         legendgrouptitle = {"text": "Traffic Volume"},
     )
 
-def displayRoads():
-    global GLOBAL_ROADS_DB
-    roads = GLOBAL_ROADS_DB
-    fig = go.Figure()
-    for c in GLOBAL_ROADS_COLORS:
-        fig.add_trace( getRoadGO(roads, c) )
+def mainGraph():
+    fig = createBaseFig()
+    fig = displayRoads(fig)
     fig = displayChargingSt(fig)
+    return fig
+
+def createBaseFig():
+    fig = go.Figure()
     fig.update_layout(
         margin=dict(l=0, r=0, t=0, b=0), width=1400, height=800,
         mapbox=dict(
             accesstoken=mapbox_access_token,
             bearing=0,
-            center=dict(lat=37.8283,lon=-99.5795),
+            center=dict(lat=37.8283, lon=-99.5795),
             pitch=0,
             zoom=3.9
         ),
         legend_x=0
     )
+    return fig
+
+def displayRoads(fig):
+    global GLOBAL_ROADS_DB
+    roads = GLOBAL_ROADS_DB
+    for c in GLOBAL_ROADS_COLORS:
+        fig.add_trace(getRoadGO(roads, c))
     return fig
 
 def displayChargingSt(fig):
@@ -182,16 +188,22 @@ app.layout = mainLayout()
 def filterPrimaryHighways(values):
     global GLOBAL_ROADS_DB
     roads = GLOBAL_ROADS_DB_BASE.copy()
-    print(roads.shape)
     if "primary" not in values:
         roads = roads[roads["type"]!="Major Highway"]
     if "secondary" not in values:
         roads = roads[roads["type"] != "Secondary Highway"]
     if "others" not in values:
         roads = roads[(roads["type"] == "Major Highway") | (roads["type"] == "Secondary Highway")]
-    print(roads.shape)
     GLOBAL_ROADS_DB = roads.copy()
-    return displayRoads()
+    return mainGraph()
+
+@app.callback(
+    Output("bot-plot", "children"),
+    Input("graph", "hoverData"),
+)
+def display_hover(hoverData):
+    print(hoverData)
+    return "Bar Plot"
 
 def binary_search(arr, low, high, x):
     if high >= low:
