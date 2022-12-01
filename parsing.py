@@ -56,7 +56,7 @@ def roadsIntoFastJson():
             if v.shape[0] == 0:
                 d = np.full((p.shape[0],1),np.nan)
             else:
-                d = cdist(v,p).min(axis=0)
+                d = cdist(v.astype(np.float64),p).min(axis=0)
         except:
             print("hehe")
         return d
@@ -67,8 +67,8 @@ def roadsIntoFastJson():
     roads["arg_min"] = dists.argmin(axis=1)
     roads["arg_min"] = np.where(dists.min(axis=1)>2, np.nan, roads["arg_min"])
     roads["volume"] = roads["arg_min"].apply(lambda x: np.nan if np.isnan(x) else volx["dailytraffic"].loc[x])
-    store = pd.HDFStore('geojsons/maps.h5')
-    store['roads'] = roads  # save it
+    with pd.HDFStore('geojsons/maps.h5') as store:
+        store['roads'] = roads  # save it
     
     return 0
 
@@ -84,8 +84,28 @@ def add_cap():
     stats['ports'] = np.where(stats['ports'].isna(), 0, stats['ports'])
     stats.to_csv('data/EV_data_capacity.csv', index = False)
 
+def get_roads():
+    df = pd.read_hdf("geojsons/maps.h5", "roads")
+    x = 0
+    rpt = [[i]*v.flatten().shape[0] for i,v in enumerate(df.lat.values)]
+    rpt = np.array([i for row in rpt for i in row])
+    lat=[i.flatten() for i in df.lat.values]
+    lon=[i.flatten() for i in df.lon.values]
+    c = np.concatenate(np.concatenate(lat))
+    d = np.concatenate(np.concatenate(lon))
+    #a = [i for x in range(len(lat)) for i in lat[x]]
+    #b = [i for x in range(len(lon)) for i in lon[x]]
+    #lat_lon = [[i,j] for i in c for j in d ]
+    #cd['lat'] = cd['lat'].apply(lambda x : x.flatten())
+    #df = df.sort_values(['lat', 'lon'], ascending=[True, False])
+    my_df=pd.DataFrame(data=c,columns=['LAT'])
+    my_df['LON'] = d.tolist()
+    my_df.to_csv('data/sorted_roads.csv', index = False)
+
 add_cap()
 roadsIntoFastJson()
+
+get_roads()
 
 
 
