@@ -12,14 +12,9 @@ def roadsIntoFastJson():
     volx = pd.read_csv("data/2020.csv")
     sel_columns = [
         "type",
-        "name","namealt","namealtt",
+        "name",
         "length_km",
         "toll",
-        "ne_part",
-        "label", "label2",
-        "expressway",
-        "level",
-        "min_label",
         "geometry"
     ]
 
@@ -79,14 +74,15 @@ def roadsIntoFastJson():
 
 def add_cap():
     stats = pd.read_csv('data/EVStations_data_cleaned.csv')
-    stats["b"] = 0
-    stats['b'] = np.where(~stats['EV Level1 EVSE Num'].isna(), 1.2 * stats['EV Level1 EVSE Num'], stats['b'])
-    stats['b'] = np.where(~stats['EV Level2 EVSE Num'].isna(),  7.6* stats['EV Level2 EVSE Num'] + stats['b'], stats['b'])
-    stats['b'] = np.where(~stats['EV DC Fast Count'].isna(),  50* stats['EV DC Fast Count'] + stats['b'], stats['b'])
-    stats['b'] = ((stats['b'].astype(int)).astype(str)) + 'kW'
+    stats["capacity"] = 0
+    stats['capacity'] = np.where(~stats['EV Level1 EVSE Num'].isna(), 1.2 * stats['EV Level1 EVSE Num'], stats['capacity'])
+    stats['capacity'] = np.where(~stats['EV Level2 EVSE Num'].isna(),  7.6* stats['EV Level2 EVSE Num'] + stats['capacity'], stats['capacity'])
+    stats['capacity'] = np.where(~stats['EV DC Fast Count'].isna(),  50* stats['EV DC Fast Count'] + stats['capacity'], stats['capacity'])
+    stats['capacity'] = ((stats['capacity'].astype(int)).astype(str)) + 'kW'
     stats['EV Connector Types'] = stats['EV Connector Types'].str.replace(' ', ', ')
-    stats.to_csv('EV_data_capacity.csv', index = False)
-
+    stats['ports'] = stats['EV Level1 EVSE Num'] + stats['EV Level2 EVSE Num'] + stats['EV DC Fast Count']
+    stats['ports'] = np.where(stats['ports'].isna(), 0, stats['ports'])
+    stats.to_csv('data/EV_data_capacity.csv', index = False)
 
 add_cap()
 roadsIntoFastJson()
