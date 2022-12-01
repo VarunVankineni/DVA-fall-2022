@@ -56,7 +56,7 @@ def roadsIntoFastJson():
             if v.shape[0] == 0:
                 d = np.full((p.shape[0],1),np.nan)
             else:
-                d = cdist(v.astype(np.float64),p).min(axis=0)
+                d = cdist(v,p).min(axis=0)
         except:
             print("hehe")
         return d
@@ -67,9 +67,11 @@ def roadsIntoFastJson():
     roads["arg_min"] = dists.argmin(axis=1)
     roads["arg_min"] = np.where(dists.min(axis=1)>2, np.nan, roads["arg_min"])
     roads["volume"] = roads["arg_min"].apply(lambda x: np.nan if np.isnan(x) else volx["dailytraffic"].loc[x])
+    roads["lat"] = roads["lat"].apply(lambda x: np.concatenate(x).flatten())
+    roads["lon"] = roads["lon"].apply(lambda x: np.concatenate(x).flatten())
     with pd.HDFStore('geojsons/maps.h5') as store:
         store['roads'] = roads  # save it
-    
+
     return 0
 
 def add_cap():
