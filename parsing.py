@@ -69,7 +69,6 @@ def roadsIntoFastJson():
     roads["volume"] = roads["arg_min"].apply(lambda x: np.nan if np.isnan(x) else volx["dailytraffic"].loc[x])
     store = pd.HDFStore('geojsons/maps.h5')
     store['roads'] = roads  # save it
-    
     return 0
 
 def add_cap():
