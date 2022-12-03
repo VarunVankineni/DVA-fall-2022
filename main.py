@@ -12,6 +12,7 @@ import plotly.graph_objects as go
 import plotly.io as pio
 import numpy as np
 import pandas as pd
+import bisect
 
 pio.renderers.default="chrome"
 mapbox_access_token = "pk.eyJ1IjoidmFydW52YW5raW5lbmkiLCJhIjoiY2xiMnFtYmphMDcwcTNvcWVxYjA0aTZvOSJ9.-olc2j26zfM8Z51fjKpqzw"
@@ -94,6 +95,7 @@ def bottomRowElements():
         style = {"width": "240", "height": "880", "font-weight": "bold", "font-size": "48px"}
     )
     main_map = dcc.Graph(id="graph", figure=displayRoads())
+
     right_plots = rightInfoPlots()
     return [C(main_map),C(right_plots)]#C(left_col)
 
@@ -193,18 +195,8 @@ def filterPrimaryHighways(values):
     GLOBAL_ROADS_DB = roads.copy()
     return displayRoads()
 
-def binary_search(arr, low, high, x):
-    if high >= low:
-        mid = (high + low) // 2
-        if arr[mid] == x:
-            return mid
-        elif arr[mid] > x:
-            return binary_search(arr, low, mid - 1, x)
-        else:
-            return binary_search(arr, mid + 1, high, x)
-    else:
-        return -1
 
-    
+
+
 
 app.run_server(debug=True)
