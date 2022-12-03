@@ -12,6 +12,7 @@ import plotly.graph_objects as go
 import plotly.io as pio
 import numpy as np
 import pandas as pd
+import bisect
 
 pio.renderers.default="chrome"
 mapbox_access_token = "pk.eyJ1IjoidmFydW52YW5raW5lbmkiLCJhIjoiY2xiMnFtYmphMDcwcTNvcWVxYjA0aTZvOSJ9.-olc2j26zfM8Z51fjKpqzw"
@@ -205,18 +206,8 @@ def display_hover(hoverData):
     print(hoverData)
     return "Bar Plot"
 
-def binary_search(arr, low, high, x):
-    if high >= low:
-        mid = (high + low) // 2
-        if arr[mid] == x:
-            return mid
-        elif arr[mid] > x:
-            return binary_search(arr, low, mid - 1, x)
-        else:
-            return binary_search(arr, mid + 1, high, x)
-    else:
-        return -1
 
-    
+
+
 
 app.run_server(debug=True)

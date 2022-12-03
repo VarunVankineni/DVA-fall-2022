@@ -1,5 +1,6 @@
 import pandas as pd
 import re
+import bisect
 import geopandas  as gpd
 from shapely.geometry.linestring import LineString
 from shapely.geometry.multilinestring import MultiLineString
@@ -56,7 +57,7 @@ def roadsIntoFastJson():
             if v.shape[0] == 0:
                 d = np.full((p.shape[0],1),np.nan)
             else:
-                d = cdist(v,p).min(axis=0)
+                d = cdist(v.astype(np.float64),p).min(axis=0)
         except:
             print("hehe")
         return d
@@ -84,26 +85,44 @@ def add_cap():
     stats['EV Connector Types'] = stats['EV Connector Types'].str.replace(' ', ', ')
     stats['ports'] = stats['EV Level1 EVSE Num'] + stats['EV Level2 EVSE Num'] + stats['EV DC Fast Count']
     stats['ports'] = np.where(stats['ports'].isna(), 0, stats['ports'])
+    df = pd.read_csv('data/sorted_roads.csv')
+    stats['distance'] = stats.apply(lambda x : dist(x, df), axis = 1)
     stats.to_csv('data/EV_data_capacity.csv', index = False)
 
 def get_roads():
     df = pd.read_hdf("geojsons/maps.h5", "roads")
-    x = 0
-    rpt = [[i]*v.flatten().shape[0] for i,v in enumerate(df.lat.values)]
-    rpt = np.array([i for row in rpt for i in row])
-    lat=[i.flatten() for i in df.lat.values]
-    lon=[i.flatten() for i in df.lon.values]
-    c = np.concatenate(lat)
-    d = np.concatenate(lon)
-    #a = [i for x in range(len(lat)) for i in lat[x]]
-    #b = [i for x in range(len(lon)) for i in lon[x]]
-    #lat_lon = [[i,j] for i in c for j in d ]
-    #cd['lat'] = cd['lat'].apply(lambda x : x.flatten())
-    my_df=pd.DataFrame(data=c,columns=['LAT'])
-    my_df['LON'] = d.tolist()
+    df = pd.concat(df.apply(data_add, axis = 1).tolist())
+    df = df.sort_values(['lat', 'lon'], ascending=[True, True])
+    df.to_csv('data/sorted_roads.csv', index = False)
 
-    my_df = my_df.sort_values(['LAT', 'LON'], ascending=[True, False])
-    my_df.to_csv('data/sorted_roads.csv', index = False)
+def data_add(r1):
+    #print(r1.index)
+    lat1 = r1['lat']
+    lon1 = r1['lon']
+    new_df = pd.DataFrame(data = lat1, columns = ['lat'] )
+    new_df['lon'] = lon1.tolist()
+    new_df['road num'] = r1.name
+    for c in r1.index.tolist():
+        if c not in ['lat', 'lon']:
+            new_df[c] = r1[c]
+    
+    return new_df.reset_index()
+
+
+def dist(r, df):
+    
+    a = bisect.bisect_left(df['lat'].tolist(), r['Latitude']) 
+    b = df['lat'].iloc[a] + 0.02
+    mx = bisect.bisect_left(df['lat'].tolist(), b) 
+    c = df['lat'].iloc[a] - 0.02
+    mn = bisect.bisect_left(df['lat'].tolist(), b) 
+    df2 = df.iloc[mn:mx+1,:][['lat','lon']] 
+    Y = cdist(r[['Latitude', 'Longitude']].values.reshape(1,-1).astype(np.float64), df2.values, 'euclidean')
+    armin = Y.argmin(axis = 1)
+    i = df2.iloc[armin,:]
+    i["min dis"] = Y.min(axis = 1)
+    return i
+
 
 add_cap()
 roadsIntoFastJson()
