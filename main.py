@@ -30,7 +30,8 @@ def getColorForVolume(volume):
     return volume, pd.cut(volume, bins, labels=colors), colors
 
 def loadBaseRoads():
-    roads = pd.read_hdf("geojsons/maps.h5", "roads")
+    #roads = pd.read_hdf("geojsons/maps.h5", "roads")
+    roads = pd.read_csv("data/sorted_roads.csv")
     roads["volume"], roads["vol_color"], colors = getColorForVolume(roads.volume)
     return(roads, colors)
 
@@ -97,22 +98,20 @@ def bottomRowElements():
     return [C(main_map),C(right_plots)]#C(left_col)
 
 
-
-
-
 def getRoadGO(roads, color):
     rdf = roads[roads.vol_color == color]
-    rpt = [[i]*v.flatten().shape[0] for i,v in enumerate(rdf.lat.values)]
-    rpt = np.array([i for row in rpt for i in row])
-    cd = rdf.iloc[rpt,:]
+    #rpt = [[i]*v.flatten().shape[0] for i,v in enumerate(rdf.lat.values)]
+    #rpt = np.array([i for row in rpt for i in row])
+    #cd = rdf.iloc[rpt,:]
+    rdf = rdf.sort_values(["road num","index"])
     return go.Scattermapbox(
-        lat=np.concatenate(rdf.lat.values),
-        lon=np.concatenate(rdf.lon.values),
+        lat=rdf.lat,
+        lon=rdf.lon,
         mode="lines",
         line=dict(width=1, color=rdf.vol_color.iloc[0]),
-        hovertemplate= '<b>Traffic Volume: '+ cd["volume"].astype(str) +
-        '<br>Highway Num: '+ cd["name"] +
-        '<br>Road Length: ' + cd["length_km"].astype(str) +
+        hovertemplate= '<b>Traffic Volume: '+ rdf["volume"].astype(str) +
+        '<br>Highway Num: '+ rdf["name"] +
+        '<br>Road Length: ' + rdf["length_km"].astype(str) +
         '<extra></extra>',
         name=next(trafficVolumeGen),
         hoverinfo="none",
@@ -205,9 +204,5 @@ def filterPrimaryHighways(values):
 def display_hover(hoverData):
     print(hoverData)
     return "Bar Plot"
-
-
-
-
 
 app.run_server(debug=True)
