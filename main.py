@@ -1,8 +1,6 @@
 from dash import Dash, dcc, html, Input, Output
 import dash_bootstrap_components as dbc
-
 from dash_bootstrap_components import Row as R, Col as C
-
 import geopandas as gpd
 from urllib.request import urlopen
 import json
@@ -31,12 +29,15 @@ def getColorForVolume(volume):
 
 def loadBaseRoads():
     #roads = pd.read_hdf("geojsons/maps.h5", "roads")
-    roads = pd.read_csv("data/sorted_roads.csv")
+    roads = pd.read_csv("data/roads.csv")
     roads["volume"], roads["vol_color"], colors = getColorForVolume(roads.volume)
     return(roads, colors)
 
 def loadChargingStationData():
     return(pd.read_csv('data/EV_data_capacity.csv'))
+
+def loadNewStationData():
+    return(pd.read_csv('data/new_cap.csv'))
 
 GLOBAL_ROADS_DB_BASE, GLOBAL_ROADS_COLORS = loadBaseRoads()
 GLOBAL_ROADS_DB = GLOBAL_ROADS_DB_BASE.copy()
@@ -82,7 +83,7 @@ def rightInfoPlots():
         style={"width": "440", "height": "440","font-weight": "bold", "font-size": "48px"}
     )
     bot_plot = html.Div(
-        "Bot Plot",
+        dcc.Graph(id="bot-graph", figure=road_plot(100, 100)),
         style={"width": "440", "height": "440","font-weight": "bold", "font-size": "48px"},
         id = "bot-plot"
     )
@@ -100,9 +101,6 @@ def bottomRowElements():
 
 def getRoadGO(roads, color):
     rdf = roads[roads.vol_color == color]
-    #rpt = [[i]*v.flatten().shape[0] for i,v in enumerate(rdf.lat.values)]
-    #rpt = np.array([i for row in rpt for i in row])
-    #cd = rdf.iloc[rpt,:]
     rdf = rdf.sort_values(["road num","index"])
     return go.Scattermapbox(
         lat=rdf.lat,
@@ -113,6 +111,7 @@ def getRoadGO(roads, color):
         '<br>Highway Num: '+ rdf["name"] +
         '<br>Road Length: ' + rdf["length_km"].astype(str) +
         '<extra></extra>',
+        customdata=rdf,
         name=next(trafficVolumeGen),
         hoverinfo="none",
         legendgroup = "Roads",
@@ -123,6 +122,7 @@ def mainGraph():
     fig = createBaseFig()
     fig = displayRoads(fig)
     fig = displayChargingSt(fig)
+    fig = displayNewSt(fig)
     return fig
 
 def createBaseFig():
@@ -151,17 +151,81 @@ def displayChargingSt(fig):
     stats = loadChargingStationData()
     fig.add_trace(
         go.Scattermapbox(
-            lat=np.concatenate([i.flatten() for i in stats.Latitude.values]),
-            lon=np.concatenate([i.flatten() for i in stats.Longitude.values]),
+            lat=stats.Latitude,
+            lon=stats.Longitude,
             mode="markers",
-            marker = dict(symbol = 'circle', size = 5, color = '#1f66e5'),
+            marker = dict(symbol = 'circle', size = 5, color = '#0e9901'),
             opacity = 0.7 ,
             hovertemplate = stats['Station Name']+'<br>'+ 'Capacity: '+stats['capacity'] +'<br>'+
                             'Port Types: ' + stats['EV Connector Types'] + '<br>' +
                             'Number of Ports: ' + stats['ports'].astype(int).astype(str) +
                             '<extra></extra>',
             hoverinfo="none",
-            name="EV Station",
+            name="Existing Station",
+            legendgroup="Stations",
+            legendgrouptitle={"text": "EV Stations"},
+        )
+    )
+    return fig
+
+def road_plot(tot, prop):
+    #tot = cur + prop
+    fig = go.Figure(go.Indicator(
+    mode = "gauge", value = 0,
+    domain = {'x': [0, 1], 'y': [0, 1]},
+    #delta = {'reference': 150, 'position': "top"},
+    title = {'text':"<b>Demand</b><br><b>Split</b><br><span style='color: gray; font-size:0.8em'>kWH</span>", 'font': {"size": 14}},
+    gauge = {
+        'shape': "bullet",
+        'axis': {'range': [None, tot]},
+        'bgcolor': "white",
+        'steps': splits(cur,tot)
+        }))
+    fig.update_layout(height = 250)
+    return fig
+
+def stat_plot(cap, road):
+    fig = go.Figure(go.Indicator(
+    mode = "gauge",
+    value = cap,
+    domain = {'x': [0, 1], 'y': [0, 1]},
+    title = {'text':"<b>Demand</b><br><b>Per Road</b><br><span style='color: gray; font-size:0.8em'>kWH</span>", 'font': {"size": 12}},
+    gauge = {
+        'shape': "bullet",
+        'axis': {'range': [None, road]},
+        'bgcolor': "white"
+        }))
+    fig.update_layout(height = 250)
+    return fig
+
+
+def splits(cur, prop):
+    x = int(prop / 12)
+
+    a = [[i, i + x - 2] for i in range(0, cur, x)]
+    s = [[i, i + x - 2] for i in range(cur, prop, x)]
+    b = [{'range': i, 'color': '#0e9901'} for i in a]
+    for i in s:
+        d = {'range': i, 'color': "#6efd61"}
+        b.append(d)
+
+    return b
+
+def displayNewSt(fig):
+    stats = loadNewStationData()
+    stats = stats[stats["capacity"]>0]
+
+    fig.add_trace(
+        go.Scattermapbox(
+            lat=stats.lat,
+            lon=stats.lon,
+            mode="markers",
+            marker = dict(symbol = 'circle', size = 5, color = '#FF0000'),
+            opacity = 0.7 ,
+            hovertemplate = 'Capacity: '+ stats['capacity'].astype(int).astype(str) + 'kWh' +'<br>'+
+                            '<extra></extra>',
+            hoverinfo="none",
+            name="Proposed Station",
             legendgroup="Stations",
             legendgrouptitle={"text": "EV Stations"},
         )
@@ -198,11 +262,20 @@ def filterPrimaryHighways(values):
     return mainGraph()
 
 @app.callback(
-    Output("bot-plot", "children"),
+    Output("bot-graph", "figure"),
     Input("graph", "hoverData"),
 )
 def display_hover(hoverData):
-    print(hoverData)
-    return "Bar Plot"
+    if hoverData is not None:
+        if 'points' in hoverData:
+            hoverData = hoverData['points'][0]
+            if "Traffic Volume" in hoverData['hovertemplate']:
+                print(hoverData)
+                cd = hoverData["customdata"]
+                tot_cap = cd[6]*cd[10]
+                prop_cap = cd[12]
+                return road_plot(tot_cap, prop_cap)
 
-app.run_server(debug=True)
+    return road_plot(0, 1)
+
+app.run_server(host='127.0.0.5', port=8050, debug=True)

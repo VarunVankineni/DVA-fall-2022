@@ -6,6 +6,7 @@ from shapely.geometry.linestring import LineString
 from shapely.geometry.multilinestring import MultiLineString
 import numpy as np
 from scipy.spatial.distance import cdist
+from geopy.distance import geodesic as GD
 
 def roadsIntoFastJson():
     zipfile = "geojsons/ne_10m_roads.zip"
@@ -128,11 +129,78 @@ def merged_roads():
     merged = df.merge(stats, how="left", left_on=["lat", "lon"], right_on=["r_lat", "r_lon"])
     merged.to_csv('data/merged.csv', index = False)
 
+def getGD(r):
+    p1 = (r["lat"], r["lon"])
+    p2 = (r["xlat"], r["xlon"])
+    return GD(p1,p2)
+
+def scaledPoint(r,t):
+    p1 = np.array((r["lat"], r["lon"]))
+    p2 = np.array((r["xlat"], r["xlon"]))
+    d = r["Dist"]
+    return ((p1*t) + (p2*(d-t)))/d
+
+def optimalStations():
+    df = pd.read_csv("data/new_ev.csv")
+    nxtdf = df["new_ev"].str.split("_", expand=True).iloc[:, 2:].astype(int)
+    nxtdf.columns = ["road num", "candidate index"]
+    df = pd.concat([nxtdf, df["capacity"]], axis=1)
+    roads = pd.read_csv('data/sorted_roads.csv')
+    odfl, rdfl = [], []
+    for rnum in sorted(set(df["road num"])):
+        odf, rdf = getAssignments(rnum, roads, df)
+        odfl.append(odf)
+        rdfl.append(rdf)
+
+    df = pd.concat(odfl)
+    roads = pd.concat(rdfl)
+    df.to_csv('data/new_cap.csv', index=False)
+    roads.to_csv('data/roads.csv', index=False)
+
+def getAssignments(rnum, roads, df):
+    node_gap = 25
+    rdf = roads[roads["road num"] == rnum].sort_values(["index"])
+    odf = df[df["road num"]== rnum].sort_values(["candidate index"])
+    odf["candidate index"] *= node_gap
+    odf["candidate index"] += node_gap
+    rdf1 = rdf[["lat", "lon"]]
+    rdf2 = rdf[["lat", "lon"]].shift(-1)
+    rdf2.columns = ["x"+i for i in rdf2.columns.tolist()]
+    rdfn = pd.concat([rdf1, rdf2], axis=1).dropna()
+    rdfn["Dist"] = rdfn.apply(getGD, axis=1)
+    rdfn["Dist"] = rdfn["Dist"]*rdf.length_km.iloc[0]/rdfn["Dist"].sum()
+    candidate_points = []
+    for i,r in enumerate(rdfn.T.items()):
+        r = r[1]
+        if i==0:
+            traversed = 0
+            distance_to_node = node_gap
+        while(1):
+            if (r['Dist']-traversed)<(distance_to_node - 1e-6):
+                distance_to_node -= (r['Dist'] -traversed)
+                traversed = 0
+                break
+            else:
+                traversed += distance_to_node
+                candidate_points.append(scaledPoint(r, traversed))
+                distance_to_node = node_gap
+    try:
+        cdf = pd.DataFrame(candidate_points)
+        cdf.index = odf.index
+        cdf.columns = ["lat", "lon"]
+        odf = pd.concat([odf,cdf], axis=1)
+    except:
+        pass
+    rdf["e_capacity"] = odf["capacity"].sum()
+    return odf, rdf
+
+
+
 #roadsIntoFastJson()
 #get_roads()
 #add_cap()
-merged_roads()
-
+#merged_roads()
+optimalStations()
 
 
 
