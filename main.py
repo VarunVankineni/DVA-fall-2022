@@ -278,4 +278,4 @@ def display_hover(hoverData):
 
     return road_plot(0, 1)
 
-app.run_server(host='127.0.0.5', port=8050, debug=True)
+app.run_server(host='127.0.0.1', port=8000, debug=True)
