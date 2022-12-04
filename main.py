@@ -179,7 +179,7 @@ def road_plot(tot, prop):
         'shape': "bullet",
         'axis': {'range': [None, tot]},
         'bgcolor': "white",
-        'steps': splits(cur,tot)
+        'steps': splits(prop,tot)
         }))
     fig.update_layout(height = 250)
     return fig
