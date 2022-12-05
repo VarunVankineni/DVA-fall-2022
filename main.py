@@ -55,9 +55,14 @@ trafficVolumeGen = trafficVolumeStrings()
 
 def topRowElements():
     title_elem = html.Div(
-        "EV Charging Station Optimization",
+        "WHERE TO BARGE-IN FOR EV CHARGIN\'",
         style={"width": "100%", "height": "100%", "font-weight": "bold", "font-size": "48px"}
     )
+    #     html.Img(
+    #     src=r'data/Logo.png', alt='image',
+    #     style={"width": "100%", "height": "100%", "font-weight": "bold", "font-size": "48px"}
+    # )
+
 
     highways = dbc.Checklist(
         options=[
@@ -80,22 +85,22 @@ def topRowElements():
 def rightInfoPlots():
     top_plot = html.Div(
         dcc.Graph(id="top-graph", figure=sunburst()),
-        style={"width": "440", "height": "440","font-weight": "bold", "font-size": "48px"},
+        style={"width": "300", "height": "300","font-weight": "bold", "font-size": "48px"},
         id = "top-plot"
     )
     top_text = html.Div(
         'State wise distribution of current EVStations Capacities',
-        style={"width": "440", "height": "440", "font-size": "28px"},
+        style={"width": "300", "height": "200", "font-size": "28px"},
         id = "top-text"
     )
     bot_plot = html.Div(
         dcc.Graph(id="bot-graph", figure=road_plot(24, 25)),
-        style={"width": "440", "height": "440","font-weight": "bold", "font-size": "48px"},
+        style={"width": "300", "height": "160","font-weight": "bold", "font-size": "48px"},
         id = "bot-plot"
     )
     bot_text1 = html.Div(
         'Demand and Proposed Wattage Split',
-        style={"width": "440", "height": "440", "font-size": "20px"},
+        style={"width": "300", "height": "200", "font-size": "20px"},
         id = "bot-text1"
     )
     #top_plot = dcc.Graph(id="top_plot2", figure=sunburst())
@@ -105,7 +110,7 @@ def rightInfoPlots():
 def bottomRowElements():
     left_col = html.Div(
         "Legend and Filters",
-        style = {"width": "240", "height": "880", "font-weight": "bold", "font-size": "48px"}
+        style = {"width": "240", "height": "900", "font-weight": "bold", "font-size": "48px"}
     )
     main_map = dcc.Graph(id="graph", figure=mainGraph())
     right_plots = rightInfoPlots()
@@ -141,13 +146,13 @@ def mainGraph():
 def createBaseFig():
     fig = go.Figure()
     fig.update_layout(
-        margin=dict(l=0, r=0, t=0, b=0), width=1400, height=800,
+        margin=dict(l=0, r=0, t=0, b=0), width=1200, height=800,
         mapbox=dict(
             accesstoken=mapbox_access_token,
             bearing=0,
             center=dict(lat=37.8283, lon=-99.5795),
             pitch=0,
-            zoom=3.9
+            zoom=3.75
         ),
         legend_x=0
     )
@@ -209,9 +214,9 @@ def road_plot(tot, prop):
         'shape': "bullet",
         'axis': {'range': [None, prop]},
         'bgcolor': "white",
-        'steps': splits(tot,prop)
+        'steps': splits(tot,prop),
         }))
-    fig.update_layout(height = 250)
+    fig.update_layout(height = 200)
     return fig
 
 def stat_plot(cap, road):
@@ -223,9 +228,9 @@ def stat_plot(cap, road):
     gauge = {
         'shape': "bullet",
         'axis': {'range': [None, road]},
-        'bgcolor': "white"
+        'bgcolor': "white",
         }))
-    fig.update_layout(height = 250)
+    fig.update_layout(height = 200)
     return fig
 
 def splits(cur, prop):
@@ -282,7 +287,7 @@ def sunburst():
         parents=[""]*len(a) + dt['State'].tolist(),
         values= dt2['total_capacity'].tolist() + dt["total_capacity"].tolist()
         ))
-    fig.update_layout(margin = dict(t=0, l=0, r=0, b=0))
+    fig.update_layout(margin = dict(t=5, l=0, r=0, b=5))
 
     return fig
 
@@ -316,7 +321,7 @@ def filterPrimaryHighways(values):
 
 @app.callback(
     Output("bot-graph", "figure"),
-    Output("bot-text1",'children'),
+    Output("bot-text1", 'children'),
     Input("graph", "hoverData"),
 )
 def display_hover(hoverData):
@@ -326,49 +331,45 @@ def display_hover(hoverData):
         if 'points' in hoverData:
             hoverData = hoverData['points'][0]
             if "Traffic Volume" in hoverData['hovertemplate']:
-                print(hoverData)
                 cd = hoverData["customdata"]
                 tot_cap = cd[6]*cd[10]
                 prop_cap = cd[12]
-                s = C([R(' '), R(' '),
-                    R('The Demand for this road is ' + str(prop_cap)),
-                 R('The Capacity of the road after introducing new stations is '+ str(int(tot_cap)) + "kWH.")])
+                s = C([
+                    R('The Demand for road: ' + str(prop_cap)),
+                    R('Road capacity with new stations: '+ str(int(tot_cap)) + "kWH.")])
                 return road_plot(tot_cap, prop_cap), s
             elif "Open" in hoverData['hovertemplate']:
-                print(hoverData)
                 cd = hoverData["customdata"]
-
                 tot_curr = int(cd[33][:-2])
-                prop = cd[41] * cd[45]
+                if cd[41] is None or cd[45] is None:
+                    prop = 0
+                else:
+                    prop = cd[41] * cd[45]
                 s = C([
-                    R(' '), R(' '),
                     R('Name : '+ cd[1]),
                     R('Capacity: '+ str(tot_curr)+'kWH'),
-                    R('Port Types: ' + str(cd[25])),  
-                    #R('Number of Ports: ' + str(int(cd[11])+int(cd[12])+int(cd[13])))
+                    R('Port Types: ' + str(cd[25])),
                 ])
 
                 return stat_plot(tot_curr,prop), s
             elif "Capacity" in hoverData['hovertemplate']:
-                print(hoverData)
+
                 cd = hoverData["customdata"]
                 rc = roads[roads['road num'] == cd[0]].iloc[0,:]
-                print(rc)
+
                 rcap = rc['demandfactor'] * rc['length_km']
                 cap = cd[2]
-                print(rcap,cap)
+
                 s = C([
-                    R(' '),
-                    R(' '),
-                    R('New Proposed Station on road ' + str(cd[0])),
-                    R('Proposed Capacity : ' + str(cap)+'kWH'),
-                    R('Total Demand of the Road : '+str(rcap.round(2))+'kWH'),
-                    R("Share of the road's demand fulfilled by this new proposed station : "+ str(((cap/rcap)*100).round(2)) +'%'),
-                    ])
+                    R('New Proposed Station on road: ' + str(cd[0])),
+                    R('Proposed Capacity: ' + str(cap)+'kWH'),
+                    R('Total Demand of the Road: '+str(rcap.round(2))+'kWH'),
+                    R("Proposed station fulfillment: "+ str(((cap/rcap)*100).round(2)) +'%'),
+                ])
 
                 return stat_plot(cap,rcap), s
 
 
-    return road_plot(0, 1)
+    return road_plot(0, 1), ""
 
 app.run_server(host='127.0.0.1', port=8000, debug=True)
