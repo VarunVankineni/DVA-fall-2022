@@ -1,0 +1,8 @@
+*.*
+!*.ipynb
+!*.py
+!*.html
+!data/
+!*.csv
+!*.zip
+!*.h5
