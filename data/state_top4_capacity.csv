@@ -1,0 +1,262 @@
+State,City,rank,total_capacity
+AK,Anchorage,3,132.0
+AK,Homer,4,114.0
+AK,Juneau,1,420.0
+AK,Others,Others,666.0
+AK,Soldotna,2,329.0
+AL,Auburn,1,1302.0
+AL,Birmingham,2,1298.0
+AL,Huntsville,3,1226.0
+AL,Montgomery,4,1156.0
+AL,Others,Others,8547.0
+AR,Brinkley,4,400.0
+AR,Little Rock,1,1765.0
+AR,Lowell,3,415.0
+AR,North Little Rock,2,500.0
+AR,Others,Others,4267.0
+AZ,Others,Others,24075.0
+AZ,Phoenix,1,7625.0
+AZ,Scottsdale,2,5597.0
+AZ,Tempe,4,2494.0
+AZ,Tucson,3,3126.0
+CA,Los Angeles,1,44560.0
+CA,Others,Others,564136.0
+CA,Sacramento,4,15714.0
+CA,San Diego,2,31595.0
+CA,San Jose,3,25162.0
+CO,Aurora,3,2802.0
+CO,Boulder,2,3354.0
+CO,Colorado Springs,4,2247.0
+CO,Denver,1,8582.0
+CO,Others,Others,45991.0
+CT,Darien,2,1645.0
+CT,Fairfield,3,1428.0
+CT,Hartford,1,1923.0
+CT,Others,Others,20819.0
+CT,Stamford,4,1419.0
+DC,Anacostia Naval Station,3,7.0
+DC,Washington,1,8661.0
+DC,Washington Navy Yard,2,60.0
+DE,Dover,3,634.0
+DE,Lewes,4,503.0
+DE,New Castle,2,911.0
+DE,Newark,1,1118.0
+DE,Others,Others,3595.0
+FL,Jacksonville,3,5086.0
+FL,Miami,1,12659.0
+FL,Orlando,2,8443.0
+FL,Others,Others,88574.0
+FL,Tampa,4,4876.0
+GA,Alpharetta,2,2160.0
+GA,Atlanta,1,14647.0
+GA,Marietta,3,1670.0
+GA,Others,Others,42111.0
+GA,Woodstock,4,1494.0
+HI,Honolulu,1,3221.0
+HI,Kapolei,2,1125.0
+HI,Kihei,3,649.0
+HI,Others,Others,4801.0
+HI,Wailuku,4,482.0
+IA,Altoona,3,1182.0
+IA,Davenport,2,1381.0
+IA,Des Moines,1,2195.0
+IA,Others,Others,12042.0
+IA,Waterloo,4,1073.0
+ID,Boise,1,1611.0
+ID,Burley,4,422.0
+ID,Idaho Falls,2,871.0
+ID,Others,Others,2870.0
+ID,Pocatello,3,493.0
+IL,Aurora,3,1286.0
+IL,Chicago,1,9684.0
+IL,Normal,4,1226.0
+IL,Others,Others,32962.0
+IL,Skokie,2,1492.0
+IN,Elkhart,2,2092.0
+IN,Fort Wayne,3,1584.0
+IN,Indianapolis,1,3525.0
+IN,Others,Others,14361.0
+IN,Rolling Prairie,4,1000.0
+KS,Olathe,2,1071.0
+KS,Others,Others,8379.0
+KS,Overland Park,1,2376.0
+KS,Topeka,3,976.0
+KS,Wichita,4,923.0
+KY,Bowling Green,2,697.0
+KY,Florence,3,679.0
+KY,Lexington,4,649.0
+KY,Louisville,1,2613.0
+KY,Others,Others,3100.0
+LA,Baton Rouge,3,643.0
+LA,Lafayette,2,817.0
+LA,Metairie,4,635.0
+LA,Natchitoches,1,1214.0
+LA,Others,Others,5302.0
+MA,Boston,1,8655.0
+MA,Cambridge,2,3524.0
+MA,Others,Others,49167.0
+MA,Wareham,4,1536.0
+MA,Worcester,3,2087.0
+MD,Baltimore,1,7356.0
+MD,Columbia,2,2157.0
+MD,Hagerstown,3,2081.0
+MD,Others,Others,42026.0
+MD,Rockville,4,1689.0
+ME,Augusta,3,667.0
+ME,Kennebunk,2,696.0
+ME,Others,Others,8776.0
+ME,Portland,1,1318.0
+ME,Waterville,4,615.0
+MI,Ann Arbor,2,2329.0
+MI,Cadillac,4,1337.0
+MI,Detroit,1,3771.0
+MI,Grand Rapids,3,1361.0
+MI,Others,Others,33117.0
+MN,Bloomington,2,1272.0
+MN,Maple Grove,4,899.0
+MN,Minneapolis,1,1961.0
+MN,Others,Others,16158.0
+MN,St. Paul,3,1003.0
+MO,Columbia,4,1114.0
+MO,Kansas City,1,7167.0
+MO,Others,Others,17291.0
+MO,Springfield,3,1128.0
+MO,St. Louis,2,1814.0
+MS,D'Iberville,1,1230.0
+MS,Hattiesburg,4,446.0
+MS,Meridian,3,496.0
+MS,Others,Others,3253.0
+MS,Tupelo,2,1228.0
+MT,Butte,2,500.0
+MT,Great Falls,4,475.0
+MT,Helena,3,482.0
+MT,Missoula,1,684.0
+MT,Others,Others,3707.0
+NC,Asheville,3,2781.0
+NC,Cary,4,2775.0
+NC,Charlotte,1,10080.0
+NC,Others,Others,36696.0
+NC,Raleigh,2,3621.0
+ND,Bismarck,3,502.0
+ND,Dickinson,2,522.0
+ND,Fargo,1,714.0
+ND,Jamestown,4,443.0
+ND,Others,Others,1019.0
+NE,Grand Island,3,817.0
+NE,Kearney,4,620.0
+NE,Lincoln,1,1234.0
+NE,Omaha,2,1111.0
+NE,Others,Others,3936.0
+NH,Concord,3,738.0
+NH,Hooksett,1,1607.0
+NH,Lincoln,4,629.0
+NH,Others,Others,6057.0
+NH,Salem,2,863.0
+NJ,East Brunswick,2,1960.0
+NJ,Elizabeth,3,1390.0
+NJ,Jersey City,1,2396.0
+NJ,Others,Others,43311.0
+NJ,Rockaway,4,1260.0
+NM,Albuquerque,1,2857.0
+NM,Gallup,4,800.0
+NM,Others,Others,4120.0
+NM,Santa Fe,2,1648.0
+NM,Truth or Consequences,3,1200.0
+NV,Henderson,4,1337.0
+NV,Las Vegas,1,11166.0
+NV,Others,Others,10008.0
+NV,Reno,2,1852.0
+NV,Sparks,3,1509.0
+NY,Albany,3,4077.0
+NY,Brooklyn,2,5346.0
+NY,New York,1,9516.0
+NY,Others,Others,97331.0
+NY,Rochester,4,3167.0
+OH,Cincinnati,2,3388.0
+OH,Columbus,1,6892.0
+OH,Maumee,3,1426.0
+OH,Others,Others,26700.0
+OH,Toledo,4,1246.0
+OK,Broken Arrow,3,1389.0
+OK,Norman,4,1248.0
+OK,Oklahoma City,1,4264.0
+OK,Others,Others,25167.0
+OK,Tulsa,2,3798.0
+ON,Brampton,2,76.0
+ON,Matheson,3,15.0
+ON,Niagara Falls,1,100.0
+ON,Toronto,4,15.0
+OR,Beaverton,2,3153.0
+OR,Bend,4,1217.0
+OR,Others,Others,26680.0
+OR,Portland,1,4826.0
+OR,Salem,3,1871.0
+PA,Allentown,3,1706.0
+PA,King of Prussia,4,1611.0
+PA,Others,Others,34211.0
+PA,Philadelphia,1,5615.0
+PA,Pittsburgh,2,4823.0
+PR,Guaynabo,2,45.0
+PR,Rio Grande,3,30.0
+PR,San Juan,1,59.0
+QC,Los Angeles,1,14.0
+RI,East Greenwich,3,560.0
+RI,Johnston,4,499.0
+RI,Others,Others,3576.0
+RI,Providence,2,1840.0
+RI,Warwick,1,2158.0
+SC,Florence,1,2933.0
+SC,Greenville,4,1522.0
+SC,Hilton Head Island,2,1957.0
+SC,Orangeburg,3,1629.0
+SC,Others,Others,12924.0
+SD,Custer,3,527.0
+SD,Others,Others,1792.0
+SD,Rapid City,4,446.0
+SD,Sioux Falls,2,721.0
+SD,Wall,1,1200.0
+TN,Chattanooga,3,2512.0
+TN,Knoxville,4,2112.0
+TN,Memphis,2,3034.0
+TN,Nashville,1,6044.0
+TN,Others,Others,12230.0
+TX,Austin,1,12272.0
+TX,Dallas,3,5698.0
+TX,Houston,2,10718.0
+TX,Others,Others,63598.0
+TX,San Antonio,4,5134.0
+UT,Beaver,2,1800.0
+UT,Draper,3,1071.0
+UT,Lehi,4,1061.0
+UT,Others,Others,16328.0
+UT,Salt Lake City,1,5129.0
+VA,Arlington,2,3685.0
+VA,Fairfax,4,2707.0
+VA,Norfolk,3,2945.0
+VA,Others,Others,46625.0
+VA,Richmond,1,4867.0
+VT,Brattleboro,3,630.0
+VT,Burlington,4,537.0
+VT,Others,Others,7593.0
+VT,Rutland,2,856.0
+VT,South Burlington,1,1059.0
+WA,Bellevue,2,5362.0
+WA,Others,Others,40549.0
+WA,Seattle,1,15611.0
+WA,Tacoma,4,2136.0
+WA,Vancouver,3,2171.0
+WI,Kenosha,4,717.0
+WI,Madison,1,3063.0
+WI,Menomonee Falls,2,890.0
+WI,Milwaukee,3,809.0
+WI,Others,Others,11007.0
+WV,Huntington,4,451.0
+WV,Morgantown,1,1047.0
+WV,Mt. Hope,2,800.0
+WV,Others,Others,3281.0
+WV,Triadelphia,3,674.0
+WY,Evanston,3,600.0
+WY,Jackson,1,1113.0
+WY,Laramie,4,460.0
+WY,Others,Others,2443.0
+WY,Rawlins,2,1000.0

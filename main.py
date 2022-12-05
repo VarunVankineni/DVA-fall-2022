@@ -79,15 +79,28 @@ def topRowElements():
 
 def rightInfoPlots():
     top_plot = html.Div(
-        "Top Plot",
-        style={"width": "440", "height": "440","font-weight": "bold", "font-size": "48px"}
+        dcc.Graph(id="top-graph", figure=sunburst()),
+        style={"width": "440", "height": "440","font-weight": "bold", "font-size": "48px"},
+        id = "top-plot"
+    )
+    top_text = html.Div(
+        'State wise distribution of current EVStations Capacities',
+        style={"width": "440", "height": "440", "font-size": "28px"},
+        id = "top-text"
     )
     bot_plot = html.Div(
-        dcc.Graph(id="bot-graph", figure=road_plot(100, 100)),
+        dcc.Graph(id="bot-graph", figure=road_plot(24, 25)),
         style={"width": "440", "height": "440","font-weight": "bold", "font-size": "48px"},
         id = "bot-plot"
     )
-    return [R(top_plot),R(bot_plot)]
+    bot_text1 = html.Div(
+        'Demand and Proposed Wattage Split',
+        style={"width": "440", "height": "440", "font-size": "20px"},
+        id = "bot-text1"
+    )
+    #top_plot = dcc.Graph(id="top_plot2", figure=sunburst())
+    
+    return [R(top_text),R(top_plot),R(bot_text1),R(bot_plot)]
 
 def bottomRowElements():
     left_col = html.Div(
@@ -156,11 +169,14 @@ def displayChargingSt(fig):
             mode="markers",
             marker = dict(symbol = 'circle', size = 5, color = '#0e9901'),
             opacity = 0.7 ,
-            hovertemplate = stats['Station Name']+'<br>'+ 'Capacity: '+stats['capacity'] +'<br>'+
-                            'Port Types: ' + stats['EV Connector Types'] + '<br>' +
-                            'Number of Ports: ' + stats['ports'].astype(int).astype(str) +
+            hovertemplate = stats['Station Name']+'<br>'+ 
+                            #'Capacity: '+stats['capacity'] +'<br>'+
+                            'Open'+' : ' + stats['Access Days Time'] + '<br>' +
+                            #'Port Types: ' + stats['EV Connector Types'] + '<br>' +
+                            #'Number of Ports: ' + stats['ports'].astype(int).astype(str) +
                             '<extra></extra>',
             hoverinfo="none",
+            customdata=stats,
             name="Existing Station",
             legendgroup="Stations",
             legendgrouptitle={"text": "EV Stations"},
@@ -170,16 +186,30 @@ def displayChargingSt(fig):
 
 def road_plot(tot, prop):
     #tot = cur + prop
-    fig = go.Figure(go.Indicator(
-    mode = "gauge", value = 0,
-    domain = {'x': [0, 1], 'y': [0, 1]},
-    #delta = {'reference': 150, 'position': "top"},
-    title = {'text':"<b>Demand</b><br><b>Split</b><br><span style='color: gray; font-size:0.8em'>kWH</span>", 'font': {"size": 14}},
-    gauge = {
+    if tot >= prop:
+        fig = go.Figure(go.Indicator(
+        mode = "gauge", value = 0,
+        domain = {'x': [0, 1], 'y': [0, 1]},
+        #delta = {'reference': 150, 'position': "top"},
+        title = {'text':"<b>Demand</b><br><b>Split</b><br><span style='color: gray; font-size:0.8em'>kWH</span>", 'font': {"size": 14}},
+        gauge = {
         'shape': "bullet",
         'axis': {'range': [None, tot]},
         'bgcolor': "white",
         'steps': splits(prop,tot)
+        }))
+    
+    else:
+        fig = go.Figure(go.Indicator(
+        mode = "gauge", value = 0,
+        domain = {'x': [0, 1], 'y': [0, 1]},
+        #delta = {'reference': 150, 'position': "top"},
+        title = {'text':"<b>Demand</b><br><b>Split</b><br><span style='color: gray; font-size:0.8em'>kWH</span>", 'font': {"size": 14}},
+        gauge = {
+        'shape': "bullet",
+        'axis': {'range': [None, prop]},
+        'bgcolor': "white",
+        'steps': splits(tot,prop)
         }))
     fig.update_layout(height = 250)
     return fig
@@ -198,16 +228,24 @@ def stat_plot(cap, road):
     fig.update_layout(height = 250)
     return fig
 
-
 def splits(cur, prop):
-    x = int(prop / 12)
-
-    a = [[i, i + x - 2] for i in range(0, cur, x)]
-    s = [[i, i + x - 2] for i in range(cur, prop, x)]
-    b = [{'range': i, 'color': '#0e9901'} for i in a]
-    for i in s:
-        d = {'range': i, 'color': "#6efd61"}
-        b.append(d)
+    cur = int(cur)
+    prop = int(prop)
+    if int(prop /12) > 0 and prop >cur:
+        if int(prop / 12) > 1:
+            x = int((prop)*0.07)
+            y = prop*0.02
+        else:
+            x = 1
+            y = prop*0.02
+        a = [[i, i + x - y ] if i+x-y <=cur else [i, cur]for i in range(0, cur, x)]
+        s = [[i, i + x - y] if i+x-y <=prop else [i, prop] for i in range(cur, prop, x)]
+        b = [{'range': i, 'color': '#0e9901'} for i in a]
+        for i in s:
+            d = {'range': i, 'color': "#6efd61"}
+            b.append(d)
+    elif int(cur /12) == 0:
+        b = [{'range': [0,cur], 'color': '#FFFFFF'}]
 
     return b
 
@@ -222,16 +260,31 @@ def displayNewSt(fig):
             mode="markers",
             marker = dict(symbol = 'circle', size = 5, color = '#FF0000'),
             opacity = 0.7 ,
-            hovertemplate = 'Capacity: '+ stats['capacity'].astype(int).astype(str) + 'kWh' +'<br>'+
+            hovertemplate = 'Capacity' +' : '+ stats['capacity'].astype(int).astype(str) + 'kWh' +'<br>'+
                             '<extra></extra>',
             hoverinfo="none",
             name="Proposed Station",
+            customdata=stats,
             legendgroup="Stations",
             legendgrouptitle={"text": "EV Stations"},
         )
     )
     return fig
 
+
+def sunburst():
+    dt = pd.read_csv("data/state_top4_capacity.csv")
+    dt['City'] = np.where(dt['City']=='Others', dt['State']+ ' Others', dt['City'])
+    dt2 = dt.groupby('State').sum()
+    a = dt['State'].unique()
+    fig =go.Figure(go.Sunburst( 
+        labels= a.tolist() + dt['City'].tolist(),
+        parents=[""]*len(a) + dt['State'].tolist(),
+        values= dt2['total_capacity'].tolist() + dt["total_capacity"].tolist()
+        ))
+    fig.update_layout(margin = dict(t=0, l=0, r=0, b=0))
+
+    return fig
 
 def mainChildren():
     return [
@@ -263,9 +316,12 @@ def filterPrimaryHighways(values):
 
 @app.callback(
     Output("bot-graph", "figure"),
+    Output("bot-text1",'children'),
     Input("graph", "hoverData"),
 )
 def display_hover(hoverData):
+    global GLOBAL_ROADS_DB
+    roads = GLOBAL_ROADS_DB.copy()
     if hoverData is not None:
         if 'points' in hoverData:
             hoverData = hoverData['points'][0]
@@ -274,7 +330,44 @@ def display_hover(hoverData):
                 cd = hoverData["customdata"]
                 tot_cap = cd[6]*cd[10]
                 prop_cap = cd[12]
-                return road_plot(tot_cap, prop_cap)
+                s = C([R(' '), R(' '),
+                    R('The Demand for this road is ' + str(prop_cap)),
+                 R('The Capacity of the road after introducing new stations is '+ str(int(tot_cap)) + "kWH.")])
+                return road_plot(tot_cap, prop_cap), s
+            elif "Open" in hoverData['hovertemplate']:
+                print(hoverData)
+                cd = hoverData["customdata"]
+
+                tot_curr = int(cd[33][:-2])
+                prop = cd[41] * cd[45]
+                s = C([
+                    R(' '), R(' '),
+                    R('Name : '+ cd[1]),
+                    R('Capacity: '+ str(tot_curr)+'kWH'),
+                    R('Port Types: ' + str(cd[25])),  
+                    #R('Number of Ports: ' + str(int(cd[11])+int(cd[12])+int(cd[13])))
+                ])
+
+                return stat_plot(tot_curr,prop), s
+            elif "Capacity" in hoverData['hovertemplate']:
+                print(hoverData)
+                cd = hoverData["customdata"]
+                rc = roads[roads['road num'] == cd[0]].iloc[0,:]
+                print(rc)
+                rcap = rc['demandfactor'] * rc['length_km']
+                cap = cd[2]
+                print(rcap,cap)
+                s = C([
+                    R(' '),
+                    R(' '),
+                    R('New Proposed Station on road ' + str(cd[0])),
+                    R('Proposed Capacity : ' + str(cap)+'kWH'),
+                    R('Total Demand of the Road : '+str(rcap.round(2))+'kWH'),
+                    R("Share of the road's demand fulfilled by this new proposed station : "+ str(((cap/rcap)*100).round(2)) +'%'),
+                    ])
+
+                return stat_plot(cap,rcap), s
+
 
     return road_plot(0, 1)
 
