@@ -4,8 +4,10 @@
 
 This project was done as the final course deliverable for Data & Visual Analytics Course (CSE 6242, Fall 2022) Georgia Tech thought by professor Polo Chao.
 The course focuses on visualizing complex data from an analytics perspective, this project comprised of 50% of the grade resulting in the final course grade of 104.6% (105.67% max).
+
 Following is a collab isntance running the app:
 https://colab.research.google.com/drive/1TvshwN-wV3uESReba-PjikactQaX18Zd?usp=sharing
+
 Initial load might take about 30 seconds (only in collab, <5secs in normal desktop run) but navigation is normally quick.
 
 ### Report
