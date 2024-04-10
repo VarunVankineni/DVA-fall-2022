@@ -50,7 +50,7 @@ class Figure:
     def __init__(self, traffic_data):
         self.traffic_data = traffic_data
         self.mapbox_access_token = "pk.eyJ1IjoidmFydW52YW5raW5lbmkiLCJhIjoiY2xiMnFtYmphMDcwcTNvcWVxYjA0aTZvOSJ9.-olc2j26zfM8Z51fjKpqzw"
-    def createBaseFig(self):
+    def _createBaseFig(self):
         fig = go.Figure()
         fig.update_layout(
             margin=dict(l=0, r=0, t=0, b=0),# width="100%", height="100%",
@@ -64,7 +64,7 @@ class Figure:
             legend_x=0
         )
         return fig
-    def getRoadGO(self, roads, color, string):
+    def _getRoadGO(self, roads, color, string):
         rdf = roads[roads.vol_color == color]
         rdf = rdf.sort_values(["road num","index"])
         rdf["hover_string"] = rdf.apply(lambda x: f"""<b>Traffic Volume: {x["volume"]}
@@ -85,13 +85,13 @@ class Figure:
             legendgroup = "Roads",
             legendgrouptitle = {"text": "Traffic Volume"},
         )
-    def trafficVolumes(self, fig):
+    def _trafficVolumes(self, fig):
         roads = self.traffic_data.roads_data_modified
         strings = self.traffic_data.trafficVolumeStrings()
         for si, c in enumerate(self.traffic_data.colors):
-            fig.add_trace(self.getRoadGO(roads, c, strings[si]))
+            fig.add_trace(self._getRoadGO(roads, c, strings[si]))
         return fig
-    def currentStations(self, fig):
+    def _currentStations(self, fig):
         def safeconvert(x):
             try:
                 return x.astype(str)
@@ -124,8 +124,8 @@ class Figure:
         )
         return fig
 
-    def newStations(self, fig):
-        stats = traffic_data.new_station_data
+    def _newStations(self, fig):
+        stats = traffic_data.new_station_data.copy()
         stats = stats[stats["capacity"] > 0]
         stats["hover_string"] = stats.apply(lambda x: f"""<br>Road Number for Proposed Station: {x["road num"]}
 <br>Proposed Station Num: {x["candidate index"]}
@@ -152,10 +152,10 @@ class Figure:
         )
         return fig
     def __call__(self):
-        fig = self.createBaseFig()
-        fig = self.trafficVolumes(fig)
-        fig = self.currentStations(fig)
-        fig = self.newStations(fig)
+        fig = self._createBaseFig()
+        fig = self._trafficVolumes(fig)
+        fig = self._currentStations(fig)
+        fig = self._newStations(fig)
         return fig
 
 
@@ -184,7 +184,7 @@ class Layout:
     def _topRowElements(self):
         title_elem = html.Div(
             "EV Charging Stations: Current Capacity, Proposed New Station and EV Traffic Flow (2022)",
-            style={"font-weight": "bold", "font-size": "3vh", 'textAlign': 'center', "height": "4vh"}
+            style={"font-weight": "bold", "font-size": "2vw", 'textAlign': 'center', "height": "3vw"}
         )
         return [C(title_elem)]
 
@@ -192,8 +192,9 @@ class Layout:
         main_map = dcc.Graph(id="graph", figure=self.figure(), style={"height": "70vh"})
         return [C(main_map)]
 
-pio.renderers.default="chrome"
-traffic_data = TrafficData()
-app = Dash(__name__, external_stylesheets=[dbc.themes.LITERA])
-app.layout = Layout(traffic_data).main_layout
-app.run_server(host='127.0.0.1', port=8000, debug=False)
+if __name__ == "__main__":
+    pio.renderers.default="chrome"
+    traffic_data = TrafficData()
+    app = Dash(__name__, external_stylesheets=[dbc.themes.LITERA])
+    app.layout = Layout(traffic_data).main_layout
+    app.run_server(host='127.0.0.1', port=8000, debug=True)
